@@ -1,0 +1,156 @@
+- Debug reboot
+- QUART CTS/RTS
+- 82C54 ?
+- TMS9918A - stop console flipping when in gfx mode
+- Sound
+- Autodetect PPIDE
+
+
+This is Fuzix for the RC2014
+
+The starting point was Scott Baker's git tree but this has been seen been
+rather reworked. 
+
+Modified for RC2014 with FlashROM/Ram board by Scott Baker <smbaker@gmail.com>.
+
+Heavily based on prior work by Will Sowerbutts <will@sowerbutts.com>, 
+Sergey Kiselev <skiselev@gmail.com>, and others.
+
+Supported Hardware
+
+	RC2014 Z80 card or compatible
+
+	512K ROM / RAM board. This board is basically a clone of the memory
+	management subsystem of the Zeta V2. It replaces the RC2014's
+	default ROM and RAM boards.
+
+	A serial IO board. Either an RC2014 SIO/2 board or a later narrow
+	decoding 68B50 adapter (eg 'The Missing Module') set to 0xA0, or
+	a 16550A serial board or QUART
+
+	A clock source (CTC, QUART or TMS9918A), or an RTC. A true timer
+	interrupt source is strongly recommended as the RTC cannot provide
+	true timer events and really slows the system down
+
+	Options:
+
+	Z80DMA at 0x04
+
+	ZXKey keyboard interface (boot option "zxkey"). Works with the TMS9918A
+	videocard to provide a classic 'keyboard/screen' interface.
+
+	PS/2 keyboard interface. Works with the TMS9918A
+	videocard to provide a classic 'keyboard/screen' interface.
+
+	16x50 cards at 0xA0/0xC0-0xF8 (the range is scanned).
+
+	DS1302 RTC at 0x0C/0xC0
+
+	RC2014 CTC at 0x88	(eg SC102)
+
+	QUART at 0xBA
+
+	Z80PIO or SC129 at 0x68 providing SD card bitbang
+
+	SC129 at 0x03 as GPIO
+
+	TMS9918A at 0x98/0x99. Must be jumpered as an interrupt source. For
+	version 3 or earlier note the errata and jumper it with a 1N4148
+	diode or similar.
+
+	VFD Display. If config.h:CONFIG_VFD_TERM is defined, then the VFD
+	Terminal will be supported. This will display all output to the serial
+	port on the VFD.
+
+	The RC2014 CF card interface, or compatible at 0x10.
+
+	Floppy Drive Interface
+
+	RC2014 Joystick
+
+	PPIDE (currently you need to change the config.h and rebuilld for this)
+
+Pending
+	Sound cards (until Fuzix gets proper audio support)
+	PS2 Keyboard/Mouse/Joystick at 0xBB
+	Z80 PIO as GPIO
+	I2C at 0x6C
+
+Unsupported Hardware
+
+	SC108/SC114/Z80SBC64 or other CPU boards with their own banking instead
+	of the 512K ROM/RAM. Please see the relevant port instead.
+	SC111 or other Z180 CPU board with linear mapped RAM. See the SC111
+	port instead.
+	LOROM 128K memory (has its own port)
+
+	SC110 CTC/serial (does not appear to be able to chain CTC pairs, as
+	is neeed for IM1 mode). You can run a wire by hand. Can still be used
+	for serial baud control.
+
+
+Things To Note When Modifying
+
+  * Do not move discard below C300 on a 16K banking setup. There is stuff in
+    start.c that requires that C000-C2FF space is free for starting init from
+    the kernel.
+
+Things that don't work
+
+  * Flow control isn't yet enabled for the serial port.
+
+Stuff To Do
+
+  * Work out how to co-exist better and maybe even modify ROMWBW so we can
+    use it
+
+  * Swap (it's there but it's most certainly not debugged or wired up fully)
+
+  * Sound support once we have the core sound layer
+
+  * Go the soft IRQ route with fast SIO serial handling for rx interrupts and
+    flip buffers. Also raises space issues as we'll need 256 bytes per SIO
+    plus the other costs
+
+  * Support Z180 timer and serial ports fully
+
+  * Use the ROMWBW data to support Z180 timers
+
+  * See if we can merge some similar ports using the ROMWBW machine info ?
+
+Setting It Up
+
+Fuzix on the RC2014 expects a normal PC style compact flash card. Fdisk up the
+card leaving the low space free as fdisk tries to do. Place a file system on
+it (type 0x7E). Do not at this point place a swap partition on it (0x7F)
+although you can certainly reserve on with a different type code.
+
+The loader and attached kernel image needs to be written to blocks 2+.
+
+You can manipulate the filesystem with ucp.
+
+If you are doing this with the emulator then the easiest way is to use makedisk
+to create a disk of suitable size and then
+
+	dd if=foo.cf of=foo.raw skip=2
+	fdisk foo.raw
+
+	add the file systems etc onto it (either by loopback mounting or
+	using dd remembering the start sector given can be used with
+		dd bs=512 seek=startsector conv=notrunc ...
+
+	dd if=foo.raw of=foo.cf seek=2 conv=notrunc
+
+When working on a real CF card or the raw file add the bootable image with
+
+	dd if=fuzix.romwbw of=/dev/sdxx seek=2 conv=notrunc
+
+to place the bootable image on sectors 2 and above in the hole the fdisk tool
+leaves for a bootable image.
+
+As ucp and fsck.fuzix support offsets in the format path:offset you can access
+the first file system with ucp foo.cf:1049600 if it starts at block 2048 of the
+CF card as normal.
+
+Then you can run
+./rc2014 -b -r 512.rom  -i foo.cf  -s  -w -R -c 

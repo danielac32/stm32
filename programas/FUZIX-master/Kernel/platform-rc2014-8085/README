@@ -1,0 +1,56 @@
+RC2014 8085
+
+Initial support for the 8085 CPU + 16550A UART card + 512/512 RAM/ROM setup
+using RC2014
+
+Supported Hardware
+
+	Etched Pixels 80C85/MMU card with CPU and MMU
+	512K linear RAM/ROM card (Small computer central SC119, Tom Szolyga,
+	Marten Feldtmann, Rotten Snow #68) etc. *NOT* the Z80 banked memory
+	card.
+	A 16Cx50 based serial adapter at 0xC0
+	PPIDE at 0x20
+
+	A clock source. Either the 82C54 card at 0x3C or a TMS9918A with
+	interrupt enabled at 0x98/0x99. If you are using the rev3 or earlier
+	board not the erratum and use a diode not a jumper for the IRQ
+
+	PPIDE at 0x20
+
+Options
+	RC2014 DS1302 card at 0x0C
+
+To Enable
+	ACIA at 0xA0			(in progress)
+	Joystick at 0x01/0x02
+	More serial ports
+	TMS9918A as console maybe ? (what to do for keyboard ?)
+
+Unsupported
+	Z80 support chip based devices (SIO, CTC, PIO, DMA)
+	IDE CF adapter (unreliable especially with higher CPU speed)
+	RC2014 Banked 512K RAM/ROM card (seems too slow for 8MHz 8085)
+	Hardware that uses the full 16bit I/O address space
+
+	For hardware requiring the standard RC2014 clock it is possible to
+	run with an 8MHz Tundra 80C85-8 part and a crystal at double the
+	classic speed.
+
+
+RC2015 8085 Addresses for I/O
+
+At this point:
+
+0x0C		DS1302
+0x20-0x23	PPIDE
+0x3C-0x3F	82C54
+0x70-0x7F	RAM/ROM card banking control
+0x98-0x99	TMS9918A
+0xA0-0xA7	ACIA (to add)
+0xC0-0xC7	16550A UART
+
+The bootloader from the ROM package goes on block 0 (with partition table),
+the kernel goes on blocks 1+ with the file system and PC partition tables
+as normal.
+

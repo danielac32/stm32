@@ -1,0 +1,86 @@
+COCO2
+=====
+
+COCO or Dragon 64 with an IDE port, cartridge and 64K of RAM
+
+Supported hardware:
+	IDE (Cloud9 or compatible set at FF50) with either built in
+		cartridge RAM or separate cartridge
+	COCO SDC
+
+Disk Layout
+===========
+
+Standard disk partitions are not handled due to limited memory. Instead each
+minor number corresponds to a 32MB slice of disc. Slice 0 holds the kernel image
+and the rest is used for swapping processes. Slice 1 then normally holds the
+first file system and so on. Add 128 for the second disc. Remember to keep
+all of them under the offset you have set in the HDBDOS ROM for your disk
+basic floppy images.
+
+Memory Map
+==========
+
+User View
+=========
+0000-00FF	Interrupt stack
+0100-01FF	Vectors plus the swap stack
+0200-19FF	Display
+1A00-1BFF	udata/stack
+1C00-7FFF	Common, data and some kernel code
+8000-FDFF	User space
+FE00-FEFF	Free
+FF00-FFFF	I/O etc
+
+Kernel Mode View
+================
+0000-00FF	Interrupt stack
+0100-01FF	Vectors plus swap stack
+0200-19FF	Display
+1A00-1BFF	udata/stack
+1C00-7FFF	Common, data and some kernel code
+8000-BFFF	ROM
+C000-FEFF	Kernel
+FF00-FFFF	I/O etc
+
+
+Emulating in XRoar
+==================
+
+Needs the IDE patches, no support for COCOSDC emulation in xroar as of 0.33.2
+
+TODO
+====
+
+Make the boot loader robust (timeout handling)
+Add hash of code not just simple magic - so we know bits match
+
+Support for a real time clock and clock locking
+
+We should be totally clean now on FIR blocking, so audio might
+actually be doable if not doing drivewire.
+
+See if given an extra loader a 64K machine with Tormod's 32K RAM cart would
+work.
+
+Switch the 6809 single process in memory code to parent first for speed.
+
+To Test
+=======
+
+Build the image and you'll get a fuzix.ide and fuzix.rom
+
+In the xroar directory where you have a hard disc image do
+
+dd if=platform/fuzix.ide of=hd0.img bs=512 seek=3 conv=notrunc
+/opt/xroaride/bin/xroar -default-machine dragon64 -cart ide -cart-rom platform/fuzix.rom
+
+exec 49152
+
+A 32MB filesystem can be put in slice 1 using dd with an offset of 32MB + 2
+sectors.
+
+For the CocoSDC the same procedure applies (without an emulator however) but
+using the fuzixsdc rom and SD image.
+
+enjoy

@@ -1,0 +1,17 @@
+{
+    "load": [
+        "/shell.elf",
+        "/blink1.elf",
+    ],
+    "stack_default": [2048],
+    "root_file": "/",
+    "app_shell": "/shell",
+    "app_elf": "/elf",
+
+    "cpu":["STM32F411",512,128],
+    "kernel":["xinu","stmos","rp2040 thread","chaOS",],
+    "UART":[115200],
+
+
+    "test":[1,2,3,4,5,6,7,8,9]
+}

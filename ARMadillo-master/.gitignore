@@ -1,0 +1,15 @@
+# Object files
+*.o
+*.elf
+
+# Linker output
+*.list
+
+# Objcopy output
+*.srec
+
+# Compiled binary
+*.img
+
+# Documents
+documentation/

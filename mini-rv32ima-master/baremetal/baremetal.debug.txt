@@ -1,0 +1,355 @@
+
+baremetal.elf:     file format elf32-littleriscv
+
+SYMBOL TABLE:
+80000000 l    d  .text	00000000 .text
+800001d0 l    d  .data	00000000 .data
+80000200 l    d  .heap	00000000 .heap
+80001200 l    d  .stack	00000000 .stack
+00000000 l    d  .debug_info	00000000 .debug_info
+00000000 l    d  .debug_abbrev	00000000 .debug_abbrev
+00000000 l    d  .debug_loc	00000000 .debug_loc
+00000000 l    d  .debug_aranges	00000000 .debug_aranges
+00000000 l    d  .debug_ranges	00000000 .debug_ranges
+00000000 l    d  .debug_line	00000000 .debug_line
+00000000 l    d  .debug_str	00000000 .debug_str
+00000000 l    d  .comment	00000000 .comment
+00000000 l    d  .riscv.attributes	00000000 .riscv.attributes
+00000000 l    d  .debug_frame	00000000 .debug_frame
+00000000 l    df *ABS*	00000000 /tmp/ccAIey3a.o
+800001e0 l       .data	00000000 asm_label
+800000e8 l       .text	00000000 _trap_exit
+8000012c l       .text	00000000 loop
+00000000 l    df *ABS*	00000000 baremetal.c
+80000150 g       .text	00000000 disable_interrupt_status
+80000060 g       .text	00000000 _trap
+8000012c  w      .text	00000000 exceptionHandler
+80000200 g       .heap	00000000 _sheap
+00001000 g       *ABS*	00000000 __stack_size
+8000016c g       .text	00000000 clear_interrupts
+80000178 g       .text	00000000 soft_trap
+8000012c  w      .text	00000000 externalHandler
+80000134 g       .text	00000000 enable_interrupt_status
+80000200 g       .data	00000000 __BSS_BEGIN__
+80000020 g       .text	00000000 asm_demo_func
+00001000 g       *ABS*	00000000 __heap_size
+80000000 g       .text	00000000 _start
+800001fa g       .data	00000000 __DATA_END__
+8000015c g       .text	00000000 disable_interrupt
+8000012c  w      .text	00000000 timerHandler
+80000200 g       .data	00000000 __BSS_END__
+800001a0 g     F .text	00000030 main
+80000140 g       .text	00000000 enable_interrupt
+800001d0 g       .text	00000000 __TEXT_END__
+80002200 g       .stack	00000000 _sstack
+80000040 g       .text	00000000 _trap_setup
+80001200 g       .stack	00000000 _estack
+800001d0 g       .data	00000000 __DATA_BEGIN__
+80001200 g       .heap	00000000 _eheap
+80000190 g     F .text	00000010 softTrapHandler
+80000000 g       .text	00000000 __TEXT_BEGIN__
+80000050 g       .text	00000000 clear_mip
+
+
+
+baremetal.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+80000000 <__TEXT_BEGIN__>:
+.global soft_trap
+
+
+.align 4
+_start:
+	la	sp, _sstack
+80000000:	00002117          	auipc	sp,0x2
+80000004:	20010113          	addi	sp,sp,512 # 80002200 <_sstack>
+	jal ra, _trap_setup 
+80000008:	038000ef          	jal	ra,80000040 <_trap_setup>
+	addi	sp,sp,-16
+8000000c:	ff010113          	addi	sp,sp,-16
+	sw	ra,12(sp)
+80000010:	00112623          	sw	ra,12(sp)
+	jal	ra, main
+80000014:	18c000ef          	jal	ra,800001a0 <main>
+80000018:	00000013          	nop
+8000001c:	00000013          	nop
+
+80000020 <asm_demo_func>:
+
+.section .text
+
+.align 4
+asm_demo_func:
+	addi sp, sp, -16
+80000020:	ff010113          	addi	sp,sp,-16
+	sw t0, 12(sp)
+80000024:	00512623          	sw	t0,12(sp)
+	la t0, asm_label
+80000028:	00000297          	auipc	t0,0x0
+8000002c:	1b828293          	addi	t0,t0,440 # 800001e0 <asm_label>
+	csrw 0x138, t0
+80000030:	13829073          	csrw	0x138,t0
+	lw t0, 12(sp)
+80000034:	00c12283          	lw	t0,12(sp)
+	addi sp, sp, 16
+80000038:	01010113          	addi	sp,sp,16
+	ret
+8000003c:	00008067          	ret
+
+80000040 <_trap_setup>:
+
+_trap_setup:
+    la t0, _trap 
+80000040:	00000297          	auipc	t0,0x0
+80000044:	02028293          	addi	t0,t0,32 # 80000060 <_trap>
+    csrrw   zero, mtvec, t0 # setup machine trap vector
+80000048:	30529073          	csrw	mtvec,t0
+    ret
+8000004c:	00008067          	ret
+
+80000050 <clear_mip>:
+
+
+
+clear_mip:
+    li t0, 1
+80000050:	00100293          	li	t0,1
+    sll a0, t0, a0
+80000054:	00a29533          	sll	a0,t0,a0
+    csrrc zero,mip, a0
+80000058:	34453073          	csrc	mip,a0
+    ret
+8000005c:	00008067          	ret
+
+80000060 <_trap>:
+
+_trap:
+        addi    sp, sp, -64    #save all temporary register on stack
+80000060:	fc010113          	addi	sp,sp,-64
+        sw      ra, 4(sp)
+80000064:	00112223          	sw	ra,4(sp)
+        sw      t0, 8(sp)
+80000068:	00512423          	sw	t0,8(sp)
+        sw      t1, 12(sp)
+8000006c:	00612623          	sw	t1,12(sp)
+        sw      t2, 16(sp)
+80000070:	00712823          	sw	t2,16(sp)
+        sw      a0, 20(sp)
+80000074:	00a12a23          	sw	a0,20(sp)
+        sw      a1, 24(sp)
+80000078:	00b12c23          	sw	a1,24(sp)
+        sw      a2, 28(sp)
+8000007c:	00c12e23          	sw	a2,28(sp)
+        sw      a3, 32(sp)
+80000080:	02d12023          	sw	a3,32(sp)
+        sw      a4, 36(sp)
+80000084:	02e12223          	sw	a4,36(sp)
+        sw      a5, 40(sp)
+80000088:	02f12423          	sw	a5,40(sp)
+        sw      a6, 44(sp)
+8000008c:	03012623          	sw	a6,44(sp)
+        sw      a7, 48(sp)
+80000090:	03112823          	sw	a7,48(sp)
+        sw      t3, 52(sp)
+80000094:	03c12a23          	sw	t3,52(sp)
+        sw      t4, 56(sp)
+80000098:	03d12c23          	sw	t4,56(sp)
+        sw      t5, 60(sp)
+8000009c:	03e12e23          	sw	t5,60(sp)
+
+                la    ra, _trap_exit            # return point for handlers
+800000a0:	00000097          	auipc	ra,0x0
+800000a4:	04808093          	addi	ra,ra,72 # 800000e8 <_trap_exit>
+        csrrc  t0, mcause, zero
+800000a8:	342032f3          	csrrc	t0,mcause,zero
+        mv a0,t0
+800000ac:	00028513          	mv	a0,t0
+        bltz t0, exceptionHandler       # interrupt causes are less than zero
+800000b0:	0002d463          	bgez	t0,800000b8 <_trap+0x58>
+800000b4:	0780006f          	j	8000012c <exceptionHandler>
+        slli t0, t0, 1                  # shift off high bit
+800000b8:	00129293          	slli	t0,t0,0x1
+        srli t0, t0, 1
+800000bc:	0012d293          	srli	t0,t0,0x1
+        li t1, 3                        # check this is an m_sofware interrupt
+800000c0:	00300313          	li	t1,3
+        beq t0, t1, softTrapHandler
+800000c4:	00629463          	bne	t0,t1,800000cc <_trap+0x6c>
+800000c8:	0c80006f          	j	80000190 <softTrapHandler>
+        li t1, 7                        # check this is an m_timer interrupt
+800000cc:	00700313          	li	t1,7
+        beq t0, t1, timerHandler
+800000d0:	00629463          	bne	t0,t1,800000d8 <_trap+0x78>
+800000d4:	0580006f          	j	8000012c <exceptionHandler>
+        li t1, 11                        # check this is an m_ext interrupt
+800000d8:	00b00313          	li	t1,11
+        beq t0, t1, externalHandler
+800000dc:	00629463          	bne	t0,t1,800000e4 <_trap+0x84>
+800000e0:	04c0006f          	j	8000012c <exceptionHandler>
+        j exceptionHandler
+800000e4:	0480006f          	j	8000012c <exceptionHandler>
+
+800000e8 <_trap_exit>:
+
+_trap_exit:
+        lw      ra, 4(sp)    # load temporary registers back from stack
+800000e8:	00412083          	lw	ra,4(sp)
+        lw      t0, 8(sp)
+800000ec:	00812283          	lw	t0,8(sp)
+        lw      t1, 12(sp)
+800000f0:	00c12303          	lw	t1,12(sp)
+        lw      t2, 16(sp)
+800000f4:	01012383          	lw	t2,16(sp)
+        lw      a0, 20(sp)
+800000f8:	01412503          	lw	a0,20(sp)
+        lw      a1, 24(sp)
+800000fc:	01812583          	lw	a1,24(sp)
+        lw      a2, 28(sp)
+80000100:	01c12603          	lw	a2,28(sp)
+        lw      a3, 32(sp)
+80000104:	02012683          	lw	a3,32(sp)
+        lw      a4, 36(sp)
+80000108:	02412703          	lw	a4,36(sp)
+        lw      a5, 40(sp)
+8000010c:	02812783          	lw	a5,40(sp)
+        lw      a6, 44(sp)
+80000110:	02c12803          	lw	a6,44(sp)
+        lw      a7, 48(sp)
+80000114:	03012883          	lw	a7,48(sp)
+        lw      t3, 52(sp)
+80000118:	03412e03          	lw	t3,52(sp)
+        lw      t4, 56(sp)
+8000011c:	03812e83          	lw	t4,56(sp)
+        lw      t5, 60(sp)
+80000120:	03c12f03          	lw	t5,60(sp)
+        addi    sp, sp, 64  # stackpointer should be the same as before the trap
+80000124:	04010113          	addi	sp,sp,64
+        mret
+80000128:	30200073          	mret
+
+8000012c <exceptionHandler>:
+.weak softTrapHandler
+softTrapHandler:
+.weak externalHandler
+externalHandler:
+loop:           # Hard_Fault
+        NOP
+8000012c:	00000013          	nop
+        J loop
+80000130:	ffdff06f          	j	8000012c <exceptionHandler>
+
+80000134 <enable_interrupt_status>:
+
+
+
+enable_interrupt_status:
+    li      t0, 8
+80000134:	00800293          	li	t0,8
+    csrrs   zero, mstatus, t0 # set mstatus.MIE=1 (enable M mode interrupt)
+80000138:	3002a073          	csrs	mstatus,t0
+    ret
+8000013c:	00008067          	ret
+
+80000140 <enable_interrupt>:
+
+enable_interrupt:
+    li      t0, 1
+80000140:	00100293          	li	t0,1
+    sll     t0, t0, a0
+80000144:	00a292b3          	sll	t0,t0,a0
+    csrrs   zero, mie, t0 # set mie
+80000148:	3042a073          	csrs	mie,t0
+    ret
+8000014c:	00008067          	ret
+
+80000150 <disable_interrupt_status>:
+
+disable_interrupt_status:
+    li      t0, 8
+80000150:	00800293          	li	t0,8
+    csrrc   zero, mstatus, t0 # set mstatus.MIE=1 (disable M mode interrupt)
+80000154:	3002b073          	csrc	mstatus,t0
+    ret
+80000158:	00008067          	ret
+
+8000015c <disable_interrupt>:
+
+disable_interrupt:
+    li      t0, 1
+8000015c:	00100293          	li	t0,1
+    sll     t0, t0, a0
+80000160:	00a292b3          	sll	t0,t0,a0
+    csrrc   zero, mie, t0 # set mie
+80000164:	3042b073          	csrc	mie,t0
+    ret
+80000168:	00008067          	ret
+
+8000016c <clear_interrupts>:
+
+clear_interrupts:
+    mv t0, zero
+8000016c:	00000293          	li	t0,0
+    csrrw   zero, mip, t0 # set mip. zero clear all pending
+80000170:	34429073          	csrw	mip,t0
+    ret
+80000174:	00008067          	ret
+
+80000178 <soft_trap>:
+
+soft_trap:
+    li t0, 8
+80000178:	00800293          	li	t0,8
+    csrrs   zero, mip, t0 # set mip.MSIE=1 set interrupts pending
+8000017c:	3442a073          	csrs	mip,t0
+    ret
+80000180:	00008067          	ret
+	...
+
+80000190 <softTrapHandler>:
+
+// These will not turn into function calls, but instead will find a way
+// of writing the assembly in-line
+static void lprint( const char * s )
+{
+	asm volatile( ".option norvc\ncsrrw x0, 0x138, %0\n" : : "r" (s));
+80000190:	800007b7          	lui	a5,0x80000
+80000194:	1d078793          	addi	a5,a5,464 # 800001d0 <_sstack+0xffffdfd0>
+80000198:	13879073          	csrw	0x138,a5
+}
+
+
+void softTrapHandler(int a) {
+    lprint("soft trap\n");
+    clear_interrupts();
+8000019c:	fd1ff06f          	j	8000016c <clear_interrupts>
+
+800001a0 <main>:
+}
+
+
+int main()
+{
+800001a0:	ff010113          	addi	sp,sp,-16
+800001a4:	00112623          	sw	ra,12(sp)
+    clear_interrupts();
+800001a8:	fc5ff0ef          	jal	ra,8000016c <clear_interrupts>
+	enable_interrupt_status();
+800001ac:	f89ff0ef          	jal	ra,80000134 <enable_interrupt_status>
+    enable_interrupt(MSIT);
+800001b0:	00300513          	li	a0,3
+800001b4:	f8dff0ef          	jal	ra,80000140 <enable_interrupt>
+    enable_interrupt(MSIT);
+800001b8:	00300513          	li	a0,3
+800001bc:	f85ff0ef          	jal	ra,80000140 <enable_interrupt>
+    enable_interrupt(MEIT);
+800001c0:	00b00513          	li	a0,11
+800001c4:	f7dff0ef          	jal	ra,80000140 <enable_interrupt>
+
+	soft_trap();
+800001c8:	fb1ff0ef          	jal	ra,80000178 <soft_trap>
+
+    while(1);
+800001cc:	0000006f          	j	800001cc <main+0x2c>

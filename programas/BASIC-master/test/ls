@@ -1,0 +1,5 @@
+print "list\n"
+
+init:
+scan_files "/"
+end

@@ -1,0 +1,70 @@
+Basic support for a 6502 RC2014 banked memory platform
+
+Use a modern cc65 from https://github.com/cc65/cc65
+
+Our memory mapping hasn't been reworked from the C000 top of space so
+still looks like this
+
+	0x0000-0x00FF	ZP
+	0x0100-0x01FF	6502 Stack (per proc)
+	0x0200-0x03FF	Loader (reclaimed for udata)
+	0x0400-0x1FFF	Common data, compiler support and whatever code fills
+			the rest (compiler support is assumed to be common by
+			several bits of asm)
+	0x2000-0x3FFF	Window of user memory
+
+	0x4000-0xFDFF	Kernel code/vectors
+	0xFE00-0xFEFF	I/O Window
+	0xFF00-0xFFF9	Not yet used (FIXME)
+	0xFFFA-0xFFFF	Vectors
+
+In user space
+
+	0x0000-0x1FFF	Kernel common and work area
+	0x2000-0xFDFF	User space
+	0xFE00-0xFEFF	I/O Window
+	0xFF00-0xFFF9	Not yet used
+	0xFFFA-0xFFFF	Vectors
+
+We operate roughly like a 16K x 4 paged setup except that for now for simplicity
+we treat user space as a fixed 48K bank switch. The other difference is that
+being a 6502 we need it the other way up.
+
+Interrupts deal wth the shared ZP by swapping the ZP back and forth with the
+interrupt copies (about 20 bytes involved)
+
+Hardware Arrangement
+
+6502 CPU
+FE00-FEFF hardwired as an I/O window that generates Z80 I/O cycles 0-FF on the
+RC2014 bus
+512K RAM/ROM
+16550A UART
+
+Challenges:
+
+Next Steps
+
+DONE	Generate the binary with the correct hole at C000-C0FF
+DONE	Test and get initial boot working
+DONE	Rebuild user space for 0x2000 start
+	(need relocatable userspace yet)
+DONE	Figure out how to reclaim 0200-03FF with commondata start
+	(need to work out how loader knows where to jump...)
+DONE	Discard segment
+DONE	Write pre-emption code
+DONE	Timer interrupt (6522VIA)
+DONE	Debug signal handling
+
+DONE	New PCB design with the IO hole at FExx
+DONE	IDE card changes to qualify /R and /W with E to try and fix the IDE
+		hardware glitching
+
+IP	Real hardware testing
+
+
+Do buffer growth into discard
+Swap support
+Move entry point etc
+
+Look at other RC2014 device support

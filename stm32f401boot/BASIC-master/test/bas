@@ -1,0 +1,63 @@
+
+
+
+print "hola como estas"
+let C=99
+let D=77
+let H=(C*D)+1
+
+print H
+
+let A=0
+init:
+print A
+let A=A+1
+
+if A=100 then goto fin
+else print "entro en else"
+
+goto init
+fin:
+print "fin del programa"
+for A=0 to 20
+for B=0 to 20
+print A,",",B
+next
+next
+end
+
+mov a,99
+mov b,77
+mul c,a,b
+addi c,0,1
+
+print #2
+movi #3,0
+
+init:
+print #3
+movi #3,#3,1
+cmpi #3,100,fin
+print string
+jmp init
+fin:
+print string
+
+movi #4,0
+for1:
+cmpi #4,20,end
+
+	movi #4,0
+	for2:
+		cmpi #5,20,end
+		print #4
+		print #5
+		addi #5,0,1
+	jmp for2
+
+addi #4,0,1
+jmp for1
+
+
+end:
+

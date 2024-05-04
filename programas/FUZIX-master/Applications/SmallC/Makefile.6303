@@ -1,0 +1,5 @@
+all:
+
+clean realclean clobber:
+	rm -f *.o sccz80 scc8080 scc6801 copt cc
+

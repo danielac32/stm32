@@ -1,0 +1,28 @@
+
+
+
+print "hola como estas"
+let C=99
+let D=77
+let H=(C*D)+1
+
+print H
+
+let A=0
+init:
+print A
+let A=A+1
+
+if A=100 then goto fin
+else print "entro en else"
+
+goto init
+fin:
+print "fin del programa"
+for A=0 to 20
+for B=0 to 20
+print A,",",B
+next
+next
+end
+

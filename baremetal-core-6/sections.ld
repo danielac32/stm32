@@ -1,0 +1,39 @@
+
+
+MEMORY 
+{
+    FLASH (xr) : ORIGIN = 0x08010000, LENGTH = 512K
+    SRAM (xrw) : ORIGIN = 0x20000000, LENGTH = 128K
+}
+
+SECTIONS
+{
+  . = 0x0;                 /* Image starts here                    */
+
+
+  .text :  {
+  KEEP(*(.isr_vector))
+    text = ABSOLUTE(.);         /* text: beginning of text segment      */
+    *(.text .text.*)            /* asm text, then C text                */
+    *(.rodata .rodata.*)        /* asm and C read-only data             */
+    etext = ABSOLUTE(.) ;       /* etext: end of text                   */
+  }
+  . = 0x20000000;
+  .data : AT(etext)
+  {
+    data = ABSOLUTE(.);         /* data: beginning of data segment      */
+    *(.data .data.*)                                                    
+    edata = ABSOLUTE(.) ;       /* edata: end of data                   */                                                    
+  }                                                                     
+  .bss ALIGN(4) :                                                                
+  {                                                                     
+    bss = ABSOLUTE(.);          /* bss: beginning of bss segment        */
+    *(.bss .bss.*)
+    *(COMMON)                   /* extra sections that are common       */
+    ebss = ABSOLUTE(.) ;        /* ebss: end of bss                     */
+    . = ALIGN(8); */
+    end = ABSOLUTE(.);          /* end: end of image                    */
+    _end = ABSOLUTE(.);         /* _end: end of image                   */
+    . = ALIGN(8);
+  }
+}
